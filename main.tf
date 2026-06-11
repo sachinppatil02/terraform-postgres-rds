@@ -7,14 +7,14 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "subnet1" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
 }
 
 resource "aws_subnet" "subnet2" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.2.0/24"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.2.0/24"
   availability_zone = "us-east-1b"
 }
 
@@ -27,7 +27,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # For production, restrict this!
+    cidr_blocks = ["0.0.0.0/0"] # For production, restrict this!
   }
 
   egress {
@@ -44,7 +44,7 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier             = "FIRSTPGDB"
+  identifier             = "sachinpgdb"
   allocated_storage      = var.db_allocated_storage
   engine                 = "postgres"
   engine_version         = "16"
