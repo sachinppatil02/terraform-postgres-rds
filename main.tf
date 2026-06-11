@@ -44,7 +44,7 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier             = "mypgdb"
+  identifier             = "FIRSTPGDB"
   allocated_storage      = var.db_allocated_storage
   engine                 = "postgres"
   engine_version         = "16"
