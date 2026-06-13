@@ -1,21 +1,37 @@
 provider "aws" {
-  region = var.region
+  region  = var.region
+  profile = "Terraform-admin"
 }
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "main-vpc"
+  }
+
 }
 
-resource "aws_subnet" "subnet1" {
+resource "aws_subnet" "public-subnet1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "Public-Subnet1"
+    Type = "Public"
+  }
+
 }
 
-resource "aws_subnet" "subnet2" {
+resource "aws_subnet" "private-subnet1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = "us-east-1b"
+  tags = {
+    Name = "private-Subnet1"
+    Type = "Private"
+  }
+
 }
 
 resource "aws_security_group" "rds_sg" {
@@ -40,7 +56,7 @@ resource "aws_security_group" "rds_sg" {
 
 resource "aws_db_subnet_group" "default" {
   name       = "main-subnet-group"
-  subnet_ids = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+  subnet_ids = [aws_subnet.public-subnet1.id, aws_subnet.private-subnet1.id]
 }
 
 resource "aws_db_instance" "postgres" {
@@ -53,7 +69,16 @@ resource "aws_db_instance" "postgres" {
   username               = var.db_username
   password               = var.db_password
   publicly_accessible    = false
-  skip_final_snapshot    = true
+  skip_final_snapshot    = false
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.default.name
+
+
+
+  tags = {
+    Name        = "PostgreSQL-RDS"
+    Environment = "Dev"
+  }
+
+
 }
