@@ -31,7 +31,7 @@ variable "db_password" {
 variable "allowed_ip" {
   description = "Your public IP address to allow connection (use 0.0.0.0/0 for anywhere - not recommended)"
   type        = string
-  default     = "0.0.0.0/0"   # Change this to your IP for better security
+  default     = "0.0.0.0/0" # Change this to your IP for better security
 }
 
 variable "instance_class" {

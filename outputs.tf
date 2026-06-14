@@ -21,3 +21,19 @@ output "connection_command" {
 output "security_group_id" {
   value = aws_security_group.rds_sg.id
 }
+
+output "replica1_endpoint" {
+  value = aws_db_instance.replica1.endpoint
+}
+
+output "replica2_endpoint" {
+  value = aws_db_instance.replica2.endpoint
+}
+
+output "all_endpoints" {
+  value = {
+    primary  = aws_db_instance.postgres.endpoint
+    replica1 = aws_db_instance.replica1.endpoint
+    replica2 = aws_db_instance.replica2.endpoint
+  }
+}

@@ -8,8 +8,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
-  profile= "Terraform-admin"
+  region  = var.region
+  profile = "Terraform-admin"
 }
 
 # Security Group for RDS
@@ -38,29 +38,71 @@ resource "aws_security_group" "rds_sg" {
 }
 
 # RDS PostgreSQL Instance
+# ================== PRIMARY ==================
 resource "aws_db_instance" "postgres" {
-  identifier             = var.db_identifier
-  engine                 = "postgres"
-  engine_version         = "16.4"           # or "17" if available in your region
-  instance_class         = var.instance_class
-  allocated_storage      = var.allocated_storage
-  storage_type           = "gp3"
+  identifier        = var.db_identifier
+  engine            = "postgres"
+  engine_version    = "16.4"
+  instance_class    = var.instance_class
+  allocated_storage = var.allocated_storage
+  storage_type      = "gp3"
 
-  db_name                = var.db_name
-  username               = var.db_username
-  password               = var.db_password
+  db_name  = var.db_name
+  username = var.db_username
+  password = var.db_password
 
   publicly_accessible    = true
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   deletion_protection    = false
 
-  # Performance & backup settings for test environment
-  backup_retention_period = 0
-  multi_az                = false
+  # REQUIRED for Read Replicas
+  backup_retention_period = 1
+  backup_window           = "03:00-04:00"
+
+  multi_az = false
 
   tags = {
-    Name        = var.db_identifier
+    Name        = "${var.db_identifier}-primary"
     Environment = "Testing"
+  }
+}
+
+
+# ================== READ REPLICA 1 ==================
+resource "aws_db_instance" "replica1" {
+  identifier             = "${var.db_identifier}-replica-1"
+  instance_class         = var.instance_class
+  storage_type           = "gp3"
+
+  replicate_source_db    = aws_db_instance.postgres.identifier   # Important
+
+  publicly_accessible    = true
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  skip_final_snapshot    = true
+
+  tags = {
+    Name        = "${var.db_identifier}-replica-1"
+    Environment = "Testing"
+    Role        = "Read-Replica"
+  }
+}
+
+# ================== READ REPLICA 2 ==================
+resource "aws_db_instance" "replica2" {
+  identifier             = "${var.db_identifier}-replica-2"
+  instance_class         = var.instance_class
+  storage_type           = "gp3"
+
+  replicate_source_db    = aws_db_instance.postgres.identifier
+
+  publicly_accessible    = true
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  skip_final_snapshot    = true
+
+  tags = {
+    Name        = "${var.db_identifier}-replica-2"
+    Environment = "Testing"
+    Role        = "Read-Replica"
   }
 }
